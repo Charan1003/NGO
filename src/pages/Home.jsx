@@ -113,7 +113,11 @@ export default function Home({ onNavigate }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [carouselPaused, setCarouselPaused] = useState(true);
   const [mediaCanAutoplay, setMediaCanAutoplay] = useState(false);
+  const [programsHovered, setProgramsHovered] = useState(false);
+  const [programsFocused, setProgramsFocused] = useState(false);
   const ngoVideoRef = useRef(null);
+  const programSliderRef = useRef(null);
+  const programsPaused = programsHovered || programsFocused;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(
@@ -157,6 +161,39 @@ export default function Home({ onNavigate }) {
   }, [mediaCanAutoplay]);
 
   useEffect(() => {
+    const slider = programSliderRef.current;
+    if (
+      programsPaused ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return undefined;
+    }
+
+    const track = slider?.querySelector(".marquee-track");
+    const cards = track?.querySelectorAll(".moving-card");
+    const firstCard = cards?.[0];
+    const repeatedCard = cards?.[programs.length];
+    if (!slider || !firstCard || !repeatedCard) return undefined;
+
+    const loopStart = repeatedCard.offsetLeft - firstCard.offsetLeft;
+    let frameId;
+    let previousTime = null;
+
+    const move = (time) => {
+      if (previousTime === null) previousTime = time;
+      const elapsed = Math.min(time - previousTime, 64);
+      previousTime = time;
+      slider.scrollLeft += elapsed * 0.04;
+      if (slider.scrollLeft >= loopStart) slider.scrollLeft -= loopStart;
+      frameId = window.requestAnimationFrame(move);
+    };
+
+    frameId = window.requestAnimationFrame(move);
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [programsPaused]);
+
+  useEffect(() => {
     if (carouselPaused) return undefined;
 
     const interval = window.setInterval(() => {
@@ -167,6 +204,26 @@ export default function Home({ onNavigate }) {
   }, [carouselPaused]);
 
   const slide = heroSlides[activeSlide];
+
+  function movePrograms(direction) {
+    const slider = programSliderRef.current;
+    const track = slider?.querySelector(".marquee-track");
+    const card = track?.querySelector(".moving-card");
+    if (!slider || !track || !card) return;
+
+    const trackStyles = window.getComputedStyle(track);
+    const gap =
+      Number.parseFloat(trackStyles.columnGap || trackStyles.gap) || 14;
+    const step = card.getBoundingClientRect().width + gap;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    slider.scrollBy({
+      left: direction * step,
+      behavior: reduceMotion ? "auto" : "smooth",
+    });
+  }
 
   return (
     <>
@@ -491,33 +548,65 @@ export default function Home({ onNavigate }) {
             </p>
           </div>
           <div
-            className="marquee"
-            role="region"
-            aria-label="Program cards"
-            tabIndex={0}
+            className="program-slider-shell"
+            onPointerEnter={() => setProgramsHovered(true)}
+            onPointerLeave={() => setProgramsHovered(false)}
+            onFocus={() => setProgramsFocused(true)}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                setProgramsFocused(false);
+              }
+            }}
           >
-            <div className="marquee-track">
-              {[...programs, ...programs].map((item, index) => (
-                <article
-                  className="card moving-card"
-                  aria-hidden={index >= programs.length ? "true" : undefined}
-                  key={`${item.title}-${index}`}
-                >
-                  <img
-                    className="program-image"
-                    src={item.image}
-                    alt={item.alt}
-                    loading="lazy"
-                  />
-                  <div className="program-content">
-                    <div className="icon">{item.icon}</div>
-                    <small>{item.place}</small>
-                    <h3>{item.title}</h3>
-                    <p>{item.text}</p>
-                  </div>
-                </article>
-              ))}
+            <button
+              className="program-slider-button program-slider-previous"
+              type="button"
+              aria-label="Show previous programs"
+              aria-controls="program-slider"
+              onClick={() => movePrograms(-1)}
+            >
+              <span aria-hidden="true">←</span>
+            </button>
+            <div
+              ref={programSliderRef}
+              id="program-slider"
+              className="marquee program-slider"
+              role="region"
+              aria-label="Program cards"
+              tabIndex={0}
+            >
+              <div className="marquee-track">
+                {[...programs, ...programs].map((item, index) => (
+                  <article
+                    className="card moving-card"
+                    aria-hidden={index >= programs.length ? "true" : undefined}
+                    key={`${item.title}-${index}`}
+                  >
+                    <img
+                      className="program-image"
+                      src={item.image}
+                      alt={item.alt}
+                      loading="lazy"
+                    />
+                    <div className="program-content">
+                      <div className="icon">{item.icon}</div>
+                      <small>{item.place}</small>
+                      <h3>{item.title}</h3>
+                      <p>{item.text}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
+            <button
+              className="program-slider-button program-slider-next"
+              type="button"
+              aria-label="Show next programs"
+              aria-controls="program-slider"
+              onClick={() => movePrograms(1)}
+            >
+              <span aria-hidden="true">→</span>
+            </button>
           </div>
           <p className="programs-note">
             Six programmes, one principle: communities should have the tools and
