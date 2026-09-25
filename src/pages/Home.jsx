@@ -459,7 +459,6 @@ export default function Home({ onNavigate }) {
             <video
               ref={ngoVideoRef}
               autoPlay={mediaCanAutoplay}
-              controls
               loop
               muted
               playsInline
