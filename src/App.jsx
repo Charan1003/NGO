@@ -63,6 +63,7 @@ export default function App() {
         className={`contact-floaters ${
           page === "home" ? "home-contact-floaters" : ""
         }`}
+        role="group"
         aria-label="Contact HopeHarbor"
       >
         <a

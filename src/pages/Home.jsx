@@ -111,11 +111,34 @@ const fieldStories = [
 
 export default function Home({ onNavigate }) {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [carouselPaused, setCarouselPaused] = useState(true);
+  const [mediaCanAutoplay, setMediaCanAutoplay] = useState(false);
   const ngoVideoRef = useRef(null);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(
+      "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
+    );
+    const syncPlaybackPreference = () => {
+      const canAutoplay = mediaQuery.matches;
+      setMediaCanAutoplay(canAutoplay);
+      setCarouselPaused(!canAutoplay);
+    };
+
+    syncPlaybackPreference();
+    mediaQuery.addEventListener("change", syncPlaybackPreference);
+
+    return () => mediaQuery.removeEventListener("change", syncPlaybackPreference);
+  }, []);
 
   useEffect(() => {
     const video = ngoVideoRef.current;
     if (!video) return undefined;
+
+    if (!mediaCanAutoplay) {
+      video.pause();
+      return undefined;
+    }
 
     video.muted = true;
     video.defaultMuted = true;
@@ -131,15 +154,17 @@ export default function Home({ onNavigate }) {
     video.addEventListener("canplay", playVideo);
 
     return () => video.removeEventListener("canplay", playVideo);
-  }, []);
+  }, [mediaCanAutoplay]);
 
   useEffect(() => {
+    if (carouselPaused) return undefined;
+
     const interval = window.setInterval(() => {
       setActiveSlide((current) => (current + 1) % heroSlides.length);
     }, 2300);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [carouselPaused]);
 
   const slide = heroSlides[activeSlide];
 
@@ -184,14 +209,19 @@ export default function Home({ onNavigate }) {
             </div>
           </div>
         </aside>
-        <div className="hero-controls" aria-label="Hero slider controls">
+        <div
+          className="hero-controls"
+          role="group"
+          aria-label="Hero slider controls"
+        >
           <button
             className="hero-arrow"
             type="button"
             aria-label="Previous slide"
             onClick={() =>
               setActiveSlide(
-                (activeSlide - 1 + heroSlides.length) % heroSlides.length,
+                (current) =>
+                  (current - 1 + heroSlides.length) % heroSlides.length,
               )
             }
           >
@@ -212,11 +242,22 @@ export default function Home({ onNavigate }) {
             ))}
           </div>
           <button
+            className="hero-arrow hero-pause"
+            type="button"
+            aria-label={
+              carouselPaused ? "Play hero slides" : "Pause hero slides"
+            }
+            aria-pressed={carouselPaused}
+            onClick={() => setCarouselPaused((current) => !current)}
+          >
+            <span aria-hidden="true">{carouselPaused ? "▶" : "Ⅱ"}</span>
+          </button>
+          <button
             className="hero-arrow"
             type="button"
             aria-label="Next slide"
             onClick={() =>
-              setActiveSlide((activeSlide + 1) % heroSlides.length)
+              setActiveSlide((current) => (current + 1) % heroSlides.length)
             }
           >
             →
@@ -360,11 +401,12 @@ export default function Home({ onNavigate }) {
           <div className="ngo-video-frame">
             <video
               ref={ngoVideoRef}
-              autoPlay
+              autoPlay={mediaCanAutoplay}
+              controls
               loop
               muted
               playsInline
-              preload="auto"
+              preload={mediaCanAutoplay ? "metadata" : "none"}
               aria-label="HopeHarbor video supporting children and communities"
             >
               <source src="/ngovid.mp4" type="video/mp4" />
@@ -448,11 +490,17 @@ export default function Home({ onNavigate }) {
               become strong and self-sustaining.
             </p>
           </div>
-          <div className="marquee" aria-label="Moving program cards">
+          <div
+            className="marquee"
+            role="region"
+            aria-label="Program cards"
+            tabIndex={0}
+          >
             <div className="marquee-track">
               {[...programs, ...programs].map((item, index) => (
                 <article
                   className="card moving-card"
+                  aria-hidden={index >= programs.length ? "true" : undefined}
                   key={`${item.title}-${index}`}
                 >
                   <img

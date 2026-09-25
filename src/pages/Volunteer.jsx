@@ -86,7 +86,14 @@ const volunteerSteps = [
 
 function DonationQr() {
   return (
-    <img className="donation-qr-image" src="/qr.png" alt="Donation QR code" />
+    <img
+      className="donation-qr-image"
+      src="/qr.png"
+      alt="Donation QR code"
+      loading="lazy"
+      width="1254"
+      height="1254"
+    />
   );
 }
 

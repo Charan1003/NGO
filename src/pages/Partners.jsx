@@ -251,10 +251,19 @@ export default function Partners() {
           ))}
         </div>
 
-        <div className="marquee partner-marquee" aria-label="Partner companies">
+        <div
+          className="marquee partner-marquee"
+          role="region"
+          aria-label="Partner companies"
+          tabIndex={0}
+        >
           <div className="marquee-track partner-track">
             {[...partners, ...partners].map((partner, index) => (
-              <div className="partner-lockup" key={`${partner.name}-${index}`}>
+              <div
+                className="partner-lockup"
+                aria-hidden={index >= partners.length ? "true" : undefined}
+                key={`${partner.name}-${index}`}
+              >
                 <PartnerLogo partner={partner} />
               </div>
             ))}
