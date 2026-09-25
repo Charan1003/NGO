@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const heroSlides = [
   {
@@ -109,26 +109,29 @@ const fieldStories = [
   },
 ];
 
-const partnerHighlights = [
-  {
-    role: "Learning",
-    title: "Nalanda Open Library",
-    text: "Bilingual readers and mentor training help after-school spaces become places to belong.",
-  },
-  {
-    role: "Health",
-    title: "Riverbank Clinics",
-    text: "Local medical teams bring flood-season care to families along the Brahmaputra chars.",
-  },
-  {
-    role: "Accountability",
-    title: "Public Ledger Lab",
-    text: "Independent review helps every partner and community see how resources are used.",
-  },
-];
-
 export default function Home({ onNavigate }) {
   const [activeSlide, setActiveSlide] = useState(0);
+  const ngoVideoRef = useRef(null);
+
+  useEffect(() => {
+    const video = ngoVideoRef.current;
+    if (!video) return undefined;
+
+    video.muted = true;
+    video.defaultMuted = true;
+
+    const playVideo = () => {
+      const playRequest = video.play();
+      if (playRequest) {
+        playRequest.catch(() => undefined);
+      }
+    };
+
+    playVideo();
+    video.addEventListener("canplay", playVideo);
+
+    return () => video.removeEventListener("canplay", playVideo);
+  }, []);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -222,31 +225,213 @@ export default function Home({ onNavigate }) {
       </section>
 
       <section className="section field-section">
-        <div className="section-head">
-          <div>
+        <div className="field-collage-layout">
+          <div className="field-copy">
             <p className="kicker">In the field</p>
             <h2>Change looks like people showing up.</h2>
+            <p>
+              We invest in the everyday places where trust grows: a classroom, a
+              kitchen, a market, or a clinic on the river.
+            </p>
+            <span className="field-copy-rule" aria-hidden="true" />
+            <p className="field-copy-note">
+              Local teams lead the work. We bring the patience, resources, and
+              relationships that help it last.
+            </p>
+          </div>
+          <div className="field-collage-frame">
+            <div className="photo-grid">
+              {fieldStories
+                .filter((story) => story.feature)
+                .map((story) => (
+                  <figure
+                    className={
+                      story.feature
+                        ? "photo-story photo-feature"
+                        : "photo-story"
+                    }
+                    key={story.label}
+                  >
+                    <img src={story.image} alt={story.alt} loading="lazy" />
+                    <figcaption>
+                      <span>{story.label}</span>
+                      <strong>{story.text}</strong>
+                    </figcaption>
+                  </figure>
+                ))}
+            </div>
+            <aside className="field-quote-card">
+              <span>Our field note</span>
+              <p>
+                “The people closest to a challenge lead the way through it.”
+              </p>
+              <strong>HopeHarbor field teams</strong>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-about">
+        <div className="home-about-media">
+          <div className="home-about-photos">
+            <img
+              className="home-about-photo-main"
+              src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&w=900&q=85"
+              alt="Community members working together outdoors"
+              loading="lazy"
+            />
+            <img
+              className="home-about-photo-small"
+              src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=85"
+              alt="Children learning together in a community space"
+              loading="lazy"
+            />
+          </div>
+          <button
+            className="btn light home-about-cta"
+            onClick={() => onNavigate("about")}
+          >
+            Read our story <span aria-hidden="true">→</span>
+          </button>
+        </div>
+        <div className="home-about-copy">
+          <p className="kicker">About us</p>
+          <h2>Trust is how good work becomes lasting change.</h2>
+          <p>
+            HopeHarbor began with neighbours sharing a meal after the 2009
+            floods. Today, we work alongside local leaders to build schools,
+            livelihoods, and care that communities can carry forward.
+          </p>
+          <p>
+            The people closest to a challenge shape the answer. Our field teams
+            in Maharashtra, Assam, and Rajasthan are drawn from — and answerable
+            to — the families they serve. We stay for years, publish how every
+            rupee is spent, and treat each community as the author of its own
+            next chapter.
+          </p>
+          <ul className="about-points">
+            <li>
+              <span className="about-point-icon" aria-hidden="true">
+                01
+              </span>
+              <p>
+                <strong>Fund the ground, not the office.</strong> Over 84% of
+                our spending goes directly to programs and the people who run
+                them.
+              </p>
+            </li>
+            <li>
+              <span className="about-point-icon" aria-hidden="true">
+                02
+              </span>
+              <p>
+                <strong>Listen before we plan.</strong> Every project begins
+                with priorities set by local leaders, not by a distant head
+                office.
+              </p>
+            </li>
+            <li>
+              <span className="about-point-icon" aria-hidden="true">
+                03
+              </span>
+              <p>
+                <strong>Stay for the long road.</strong> Relief is a door;
+                belonging is the house we build together over years.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="ngo-children-section">
+        <div className="ngo-children-layout">
+          <div className="ngo-children-copy">
+            <p className="kicker">For every child</p>
+            <h2>Every child deserves a safe place to grow.</h2>
+            <p>
+              HopeHarbor partners with local leaders to keep children in classrooms,
+              healthy at home, and close to the people who know them best.
+            </p>
+            <div className="ngo-children-promise">
+              <span>Our promise</span>
+              <strong>Child-led change, supported for the long haul.</strong>
+            </div>
+          </div>
+          <div className="ngo-video-frame">
+            <video
+              ref={ngoVideoRef}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              aria-label="HopeHarbor video supporting children and communities"
+            >
+              <source src="/ngovid.mp4" type="video/mp4" />
+              Your browser does not support embedded videos.
+            </video>
+            <span className="ngo-video-label">Children first. Always.</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="section accreditation-section">
+        <div className="section-head accreditation-head">
+          <div>
+            <p className="kicker">Empanelment &amp; accreditations</p>
+            <h2>Accountability you can see.</h2>
           </div>
           <p>
-            We invest in the everyday places where trust grows: a classroom, a
-            kitchen, a market, or a clinic on the river.
+            Our commitments are backed by independent networks and clear
+            standards for how we serve communities and steward every rupee.
           </p>
         </div>
-        <div className="photo-grid">
-          {fieldStories.map((story) => (
-            <figure
-              className={
-                story.feature ? "photo-story photo-feature" : "photo-story"
-              }
-              key={story.label}
-            >
-              <img src={story.image} alt={story.alt} loading="lazy" />
-              <figcaption>
-                <span>{story.label}</span>
-                <strong>{story.text}</strong>
-              </figcaption>
-            </figure>
-          ))}
+        <div className="accreditation-grid">
+          <article className="accreditation-card">
+            <img
+              className="accreditation-image"
+              src="/2017-2.png.webp"
+              alt="Global Compact membership certificate"
+              loading="lazy"
+            />
+            <div className="accreditation-content">
+              <h3>Global Compact membership</h3>
+              <p>
+                Our work aligns with shared principles for responsible and
+                sustainable community development.
+              </p>
+            </div>
+          </article>
+          <article className="accreditation-card">
+            <img
+              className="accreditation-image"
+              src="/Guide-star.jpg.webp"
+              alt="GuideStar accreditation badge"
+              loading="lazy"
+            />
+            <div className="accreditation-content">
+              <h3>Platinum transparency</h3>
+              <p>
+                Independent review recognises the openness of our reporting and
+                public accountability.
+              </p>
+            </div>
+          </article>
+          <article className="accreditation-card">
+            <img
+              className="accreditation-image"
+              src="/caf.png.webp"
+              alt="CAF International validation badge"
+              loading="lazy"
+            />
+            <div className="accreditation-content">
+              <h3>Due diligence validated</h3>
+              <p>
+                Our systems are assessed against rigorous standards for trust,
+                governance, and responsible giving.
+              </p>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -290,63 +475,6 @@ export default function Home({ onNavigate }) {
             Six programmes, one principle: communities should have the tools and
             trust to shape their own next chapter.
           </p>
-        </div>
-      </section>
-
-      <section className="home-partners">
-        <div className="home-partners-head">
-          <div>
-            <p className="kicker">Our partners</p>
-            <h2>We never try to be the whole village.</h2>
-          </div>
-          <p>
-            The people closest to a challenge lead the work. We fund, connect,
-            and stay accountable alongside them.
-          </p>
-        </div>
-        <div className="home-partner-grid">
-          {partnerHighlights.map((partner) => (
-            <article className="home-partner-item" key={partner.title}>
-              <small>{partner.role}</small>
-              <h3>{partner.title}</h3>
-              <p>{partner.text}</p>
-            </article>
-          ))}
-        </div>
-        <button
-          className="btn partner-link"
-          onClick={() => onNavigate("partners")}
-        >
-          Meet all our partners <span aria-hidden="true">→</span>
-        </button>
-      </section>
-
-      <section className="home-about">
-        <div className="home-about-photos">
-          <img
-            className="home-about-photo-main"
-            src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&w=900&q=85"
-            alt="Community members working together outdoors"
-            loading="lazy"
-          />
-          <img
-            className="home-about-photo-small"
-            src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=600&q=85"
-            alt="Children learning together in a community space"
-            loading="lazy"
-          />
-        </div>
-        <div className="home-about-copy">
-          <p className="kicker">About us</p>
-          <h2>Trust is how good work becomes lasting change.</h2>
-          <p>
-            HopeHarbor began with neighbours sharing a meal after the 2009
-            floods. Today, we work alongside local leaders to build schools,
-            livelihoods, and care that communities can carry forward.
-          </p>
-          <button className="btn light" onClick={() => onNavigate("about")}>
-            Read our story <span aria-hidden="true">→</span>
-          </button>
         </div>
       </section>
     </>

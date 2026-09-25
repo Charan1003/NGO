@@ -1,3 +1,5 @@
+import PageHero from "../components/PageHero";
+
 const values = [
   {
     title: "Local first",
@@ -43,16 +45,12 @@ const team = [
 export default function About() {
   return (
     <>
-      <section className="page-hero">
-        <p className="kicker">About us</p>
-        <h1>We started as a kitchen. We stayed as neighbours.</h1>
-        <p className="page-intro">
-          After the 2009 floods, a group of teachers in Palghar cooked for
-          families sleeping in a school. That kitchen became HopeHarbor — a
-          trust that now backs organisers, classrooms, and small businesses
-          across 42 districts.
-        </p>
-      </section>
+      <PageHero
+        title="About us"
+        subtitle="We started as a kitchen. We stayed as neighbours."
+        intro="After the 2009 floods, a group of teachers in Palghar cooked for families sleeping in a school. That kitchen became HopeHarbor — a trust that now backs organisers, classrooms, and small businesses across 42 districts."
+        image="/ocg-saving-the-ocean-_1j7_atc0z8-unsplash.png.jpg"
+      />
 
       <section className="section trust-section">
         <div className="trust-feature">
@@ -101,8 +99,18 @@ export default function About() {
         </div>
       </section>
 
-      <section className="section">
-        <div className="grid-2">
+      <section className="section about-values-section">
+        <div className="section-head about-values-head">
+          <div>
+            <p className="kicker">How we work</p>
+            <h2>Principles that hold up in the real world.</h2>
+          </div>
+          <p>
+            Our approach is simple to say and demanding to practice: share
+            power, stay transparent, and build for the long term.
+          </p>
+        </div>
+        <div className="grid-2 about-values-layout">
           <blockquote className="quote">
             <p>
               “Aid that leaves when the cameras leave is just weather. We wanted
@@ -111,8 +119,9 @@ export default function About() {
             <cite>— Meera Joshi, founding teacher</cite>
           </blockquote>
           <div className="grid-3" style={{ gridTemplateColumns: "1fr" }}>
-            {values.map((value) => (
-              <article className="card" key={value.title}>
+            {values.map((value, index) => (
+              <article className="card value-card" key={value.title}>
+                <span className="value-index">0{index + 1}</span>
                 <h3>{value.title}</h3>
                 <p>{value.text}</p>
               </article>
@@ -138,12 +147,16 @@ export default function About() {
         </div>
       </section>
 
-      <section className="section alt">
+      <section className="section alt about-team-section">
         <div className="section-head">
           <div>
             <p className="kicker">People</p>
             <h2>The table we keep</h2>
           </div>
+          <p>
+            Field leads, teachers, nurses, and organisers bring the context that
+            makes every decision more useful.
+          </p>
         </div>
         <div className="team">
           {team.map((person) => (

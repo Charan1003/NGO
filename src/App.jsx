@@ -1,31 +1,70 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import About from "./pages/About";
-import Career from "./pages/Career";
+import Work from "./pages/Work";
 import Partners from "./pages/Partners";
 import Volunteer from "./pages/Volunteer";
 
 const pages = {
   home: Home,
   about: About,
-  career: Career,
+  work: Work,
   partners: Partners,
   volunteer: Volunteer,
 };
 
 export default function App() {
   const [page, setPage] = useState("home");
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const headerRef = useRef(null);
   const Page = pages[page];
 
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    if (!header) return undefined;
+
+    const updateHeaderHeight = () => {
+      setHeaderHeight(header.getBoundingClientRect().height);
+    };
+
+    updateHeaderHeight();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateHeaderHeight);
+      return () => window.removeEventListener("resize", updateHeaderHeight);
+    }
+
+    const observer = new ResizeObserver(updateHeaderHeight);
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+
+  function handleNavigate(nextPage) {
+    setPage(nextPage);
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }
+
   return (
-    <div className="app">
-      <Header page={page} onNavigate={setPage} />
+    <div
+      className={`app${page === "home" ? " home-app" : ""}`}
+      style={{ "--header-height": `${headerHeight}px` }}
+    >
+      <Header
+        page={page}
+        onNavigate={handleNavigate}
+        headerRef={headerRef}
+      />
       <main>
-        <Page onNavigate={setPage} />
+        <Page onNavigate={handleNavigate} />
       </main>
-      <div className="contact-floaters" aria-label="Contact HopeHarbor">
+      <div
+        className={`contact-floaters ${
+          page === "home" ? "home-contact-floaters" : ""
+        }`}
+        aria-label="Contact HopeHarbor"
+      >
         <a
           className="contact-floater whatsapp-floater"
           href="https://wa.me/912240001847"
@@ -53,7 +92,7 @@ export default function App() {
           <strong>Call us</strong>
         </a>
       </div>
-      <Footer onNavigate={setPage} />
+      <Footer onNavigate={handleNavigate} />
     </div>
   );
 }

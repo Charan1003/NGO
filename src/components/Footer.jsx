@@ -29,9 +29,7 @@ export default function Footer({ onNavigate }) {
           <h3>Navigation</h3>
           <button onClick={() => onNavigate("home")}>Home</button>
           <button onClick={() => onNavigate("about")}>About us</button>
-          <button onClick={() => onNavigate("career")}>
-            Careers at HopeHarbor
-          </button>
+          <button onClick={() => onNavigate("work")}>Our work</button>
           <button onClick={() => onNavigate("volunteer")}>
             Volunteer with us
           </button>

@@ -1,14 +1,14 @@
 const links = [
   { id: "home", label: "Home" },
   { id: "about", label: "About us" },
-  { id: "career", label: "Career" },
+  { id: "work", label: "Our work" },
   { id: "partners", label: "Partners" },
   { id: "volunteer", label: "Volunteer" },
 ];
 
-export default function Header({ page, onNavigate }) {
+export default function Header({ page, onNavigate, headerRef }) {
   return (
-    <header className="site-header">
+    <header ref={headerRef} className="site-header">
       <button className="brand" onClick={() => onNavigate("home")}>
         <img
           className="brand-logo"
